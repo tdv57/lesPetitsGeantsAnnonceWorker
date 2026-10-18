@@ -4,4 +4,3 @@ export const TypeMediaEnumValue = {
 } as const;
 
 export type TypeMediaEnum = (typeof TypeMediaEnumValue) [keyof typeof TypeMediaEnumValue];
-

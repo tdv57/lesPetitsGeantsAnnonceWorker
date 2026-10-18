@@ -1,3 +1,5 @@
+import { HttpContentfulStatus } from "../enums/HttpStatusEnum";
+import { TdvError } from "../error/TdvError";
 import { fromD1AnnonceToAnnonceSelect } from "../mapper/AnnonceMapper";
 import { AnnonceInsert, AnnonceSelect, AnnonceUpdate, D1Annonce } from "../types/AnnonceType";
 
@@ -32,7 +34,9 @@ export async function createAnnonce(
                 annonce.redirectionLink ?? null)
             .first<D1Annonce>();
 
-    if (!row) throw new Error("Insertion sans résultat");
+    if (!row) throw new TdvError(
+        'Insertion sans résultat', 
+        HttpContentfulStatus.INTERNAL_SERVER_ERROR);
     return fromD1AnnonceToAnnonceSelect(row);
 } 
 
@@ -49,7 +53,7 @@ export async function updateAnnonce(
     db: D1Database,
     id: number,
     annonce: AnnonceUpdate
-): Promise<AnnonceSelect | null> {
+): Promise<AnnonceSelect> {
     const row = await db.prepare(UPDATE_QUERY)
             .bind(
                 annonce.code,
@@ -60,6 +64,6 @@ export async function updateAnnonce(
                 id)
             .first<D1Annonce>();
 
-    if (!row) throw new Error("Modification sans résultat");
+    if (!row) throw new TdvError(`Annonce ${id} introuvable`, HttpContentfulStatus.NOT_FOUND)
     return fromD1AnnonceToAnnonceSelect(row);
 }

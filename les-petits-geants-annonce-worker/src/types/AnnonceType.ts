@@ -1,4 +1,8 @@
-import { TypeMediaEnum } from "../enums/TypeMediaEnum"
+import { Context } from "hono"
+import { TypeMediaEnum, TypeMediaEnumValue } from "../enums/TypeMediaEnum"
+import { BlankInput } from "hono/types"
+import { z } from 'zod'
+import { AnnonceInsertSchema, AnnonceSelectSchema } from "../validation/AnnonceValidation"
 
 export type D1Annonce = {
   id: number
@@ -10,19 +14,16 @@ export type D1Annonce = {
   created_at: string
 }
 
-export type AnnonceSelect = {
-  id: number
-  code: string
-  url: string
-  mediaType: TypeMediaEnum
-  commentaire: string
-  redirectionLink: string | undefined
-  createdAt: Date
+
+export type AnnonceSelect = z.infer<typeof AnnonceSelectSchema>;
+export type AnnonceInsert = z.infer<typeof AnnonceInsertSchema>;
+export type AnnonceUpdate = AnnonceInsert;
+
+
+export type Bindings = {
+  DB_ANNONCE: D1Database
+  D1_ANNONCE_ACCESS_KEY: string
+  JWT_SECRET: string
 }
 
-export type AnnonceInsert = Omit<AnnonceSelect, "id" | "createdAt">
-export type AnnonceUpdate = AnnonceInsert
-
-export interface Env {
-    DB_ANNONCE: D1Database
-}
+export type AnnonceContext = Context<{ Bindings: Bindings }, any, BlankInput>
