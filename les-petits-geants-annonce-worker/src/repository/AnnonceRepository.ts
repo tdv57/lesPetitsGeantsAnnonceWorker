@@ -7,13 +7,13 @@ const SELECT_QUERY = "SELECT * FROM annonces ORDER BY created_at DESC";
 const INSERT_QUERY = `
     INSERT INTO annonces 
     (code, url, media_type, commentaire, redirection_link) 
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (?1, ?2, ?3, ?4, ?5)
     RETURNING *`;
-const DELETE_QUERY = "DELETE FROM annonces WHERE id=?";
+const DELETE_QUERY = "DELETE FROM annonces WHERE id=?1";
 const UPDATE_QUERY = `
   UPDATE annonces
-  SET code = ?, url = ?, media_type = ?, commentaire = ?, redirection_link = ?
-  WHERE id = ?
+  SET code = ?1, url = ?2, media_type = ?3, commentaire = ?4, redirection_link = ?5
+  WHERE id = ?6
   RETURNING *`;
 
 export async function findAllAnnonce(db: D1Database): Promise<AnnonceSelect[]> {

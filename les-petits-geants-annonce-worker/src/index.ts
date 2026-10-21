@@ -9,6 +9,7 @@ import { AnnonceInsertSchema, AnnonceUpdateSchema } from './validation/AnnonceVa
 import { idParam } from './validation/routerValidation';
 import { TdvError } from './error/TdvError';
 import { HttpContentfulStatus, HttpContentlessStatus } from './enums/HttpStatusEnum';
+import { HTTPException } from 'hono/http-exception';
 
 const app = new Hono<{ Bindings: Bindings}>();
 
@@ -61,6 +62,9 @@ app.onError((err, c) => {
     if (err instanceof TdvError) {
         return c.json({ error: err.message }, err.status);
     }
+	if (err instanceof HTTPException) {
+		return err.getResponse(); // renvoie le 401 préparé par bearerAuth / jwt
+	}
     console.error(err);
     return c.json({ error: 'Erreur serveur'}, HttpContentfulStatus.INTERNAL_SERVER_ERROR);
 })

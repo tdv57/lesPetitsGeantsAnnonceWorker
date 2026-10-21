@@ -11,8 +11,13 @@ export const AnnonceSelectSchema = z.object({
   createdAt: z.coerce.date()
 })
 
-const urlSeTermineParCode = (a: {url: string; code: string}) => 
-    new URL(a.url).pathname.split('/').filter(Boolean).pop() === a.code;
+const urlSeTermineParCode = (a: {url: string; code: string}) => {
+  try {
+    return new URL(a.url).pathname.split('/').filter(Boolean).pop() === a.code;
+  } catch {
+    return false;
+  }
+}
 
 export const AnnonceInsertSchema = AnnonceSelectSchema.omit({
   id: true,
