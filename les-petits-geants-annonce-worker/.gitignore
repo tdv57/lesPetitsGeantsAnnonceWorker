@@ -166,3 +166,4 @@ dist
 !.env.example
 .wrangler/
 .env
+worker-configuration.d.ts

@@ -20,6 +20,12 @@ export default defineConfig(async () => {
 		],
 		test: {
 			setupFiles: ["./test/ApplyMigration.ts"],
+			coverage: {
+				provider: "istanbul" as const,
+				include: ["src/**/*.ts"],       // mesurer seulement votre code, pas les tests
+				reporter: ["text", "html"],      // tableau dans le terminal + rapport navigable
+			},
 		},
+
 	})
 });
