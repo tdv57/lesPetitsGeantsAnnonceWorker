@@ -1,5 +1,5 @@
 import {Context, Hono} from 'hono'
-import { createAnnonce, deleteAnnonce, findAllAnnonce, updateAnnonce } from './repository/AnnonceRepository';
+import { createAnnonce, deleteAnnonce, findAllAnnonce, getAnnonceById, updateAnnonce } from './repository/AnnonceRepository';
 import { bearerAuth } from 'hono/bearer-auth';
 import { AnnonceInsert, AnnonceUpdate, Bindings } from './types/AnnonceType';
 import { buildJwt, requireAuth } from './auth';
@@ -29,6 +29,15 @@ app.on(['POST', 'PUT', 'PATCH', 'DELETE'], '/annonces/*', requireAuth);
 app.get('/annonces', async (c) => {
     return c.json(await findAllAnnonce(c.env.DB_ANNONCE), HttpContentfulStatus.OK);
 });
+
+app.get(
+    '/annonces/:id', 
+    zValidator('param', idParam), 
+        async (c) => {
+        const { id } = c.req.valid('param');
+        return c.json(await getAnnonceById(c.env.DB_ANNONCE, id), HttpContentfulStatus.OK);
+    }
+);
 
 app.post(
     '/annonces', 

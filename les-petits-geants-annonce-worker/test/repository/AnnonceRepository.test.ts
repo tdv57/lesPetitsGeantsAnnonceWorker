@@ -1,9 +1,10 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
-import { findAllAnnonce, createAnnonce, deleteAnnonce, updateAnnonce } from "../../src/repository/AnnonceRepository"
+import { findAllAnnonce, createAnnonce, deleteAnnonce, updateAnnonce, getAnnonceById } from "../../src/repository/AnnonceRepository"
 import { createAnnonceForTest, findAnnonceByIdForTest, makeAnnonceInsert, makeAnnonceSelect } from "../Factory"
 import { env } from "cloudflare:workers";
 import { AnnonceSelect } from "../../src/types/AnnonceType";
 import { TypeMediaEnumValue } from "../../src/enums/TypeMediaEnum";
+import { TdvError } from "../../src/error/TdvError";
 
 beforeEach(async () => {
     await env.DB_ANNONCE.exec("DELETE FROM annonces");
@@ -36,6 +37,22 @@ describe("findAllAnnonce", () => {
         expect(result.map(r => r.code)).toEqual(["RECENT", "ANCIEN"])
     });
 });
+
+describe("getAnnonceById", () => {
+    it("Doit donner l'annonce quand l'id est correct", async () => {
+        const inserted = await createAnnonceForTest({}, env.DB_ANNONCE);
+        const expected = makeAnnonceSelect({ id: inserted.id, code: inserted.code, url: inserted.url, createdAt: inserted.createdAt });
+
+        const result = await getAnnonceById(env.DB_ANNONCE, inserted.id);
+        expect(result).toEqual(expected);
+    });
+
+    it("Doit lever une erreur 404 quand l'id n'existe pas", async () => {
+        await expect(getAnnonceById(env.DB_ANNONCE, 1000000)).rejects.toMatchObject({
+            status: 404,
+        });
+    });
+})
 
 describe("deleteAnnonce", () => {
 

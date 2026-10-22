@@ -3,7 +3,8 @@ import { TdvError } from "../error/TdvError";
 import { fromD1AnnonceToAnnonceSelect } from "../mapper/AnnonceMapper";
 import { AnnonceInsert, AnnonceSelect, AnnonceUpdate, D1Annonce } from "../types/AnnonceType";
 
-const SELECT_QUERY = "SELECT * FROM annonces ORDER BY created_at DESC";
+const FIND_ALL_QUERY = "SELECT * FROM annonces ORDER BY created_at DESC";
+const FIND_BY_ID_QUERY = "SELECT * FROM annonces WHERE id = ?1"
 const INSERT_QUERY = `
     INSERT INTO annonces 
     (code, url, media_type, commentaire, redirection_link) 
@@ -17,8 +18,16 @@ const UPDATE_QUERY = `
   RETURNING *`;
 
 export async function findAllAnnonce(db: D1Database): Promise<AnnonceSelect[]> {
-    const { results } = await db.prepare(SELECT_QUERY).all<D1Annonce>();
+    const { results } = await db.prepare(FIND_ALL_QUERY).all<D1Annonce>();
     return results.map(fromD1AnnonceToAnnonceSelect);
+}
+
+export async function getAnnonceById(db: D1Database, id: number): Promise<AnnonceSelect> {
+    const row = await db.prepare(FIND_BY_ID_QUERY).bind(id).first<D1Annonce>();
+    if (!row) throw new TdvError(
+        'Recherche sans résultat', 
+        HttpContentfulStatus.NOT_FOUND);
+    return fromD1AnnonceToAnnonceSelect(row);
 }
 
 export async function createAnnonce(

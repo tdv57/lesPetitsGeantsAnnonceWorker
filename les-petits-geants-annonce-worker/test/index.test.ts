@@ -62,7 +62,26 @@ describe('GET /annonces', () => {
     });
 });
 
+describe('GET /annonces/:id', () => {
+    beforeEach(async () => await env.DB_ANNONCE.exec("DELETE FROM annonces"));
+
+    it('Doit renvoyer 200 l\'élément en base si il existe', async () => {
+        const inserted = await createAnnonceForTest({}, env.DB_ANNONCE);
+        const expected = makeAnnonceSelect({ id: inserted.id, code: inserted.code, url: inserted.url, createdAt: inserted.createdAt });
+        const response = await request(`/annonces/${inserted.id}`);
+        const responseBody = await response.json() as AnnonceSelect;
+        expect(response.status).toBe(HttpContentfulStatus.OK);
+        expect(responseBody).toEqual({...expected,createdAt: expected.createdAt.toISOString(),}); 
+    });
+    it('Doit renvoyer 404 si l\'élément n\'existe pas', async () => {
+        const response = await request(`/annonces/${100000}`);
+        expect(response.status).toBe(404);
+    })
+})
+
 describe('POST /annonces', () => {
+    beforeEach(async () => await env.DB_ANNONCE.exec("DELETE FROM annonces"));
+
     it('Doit renvoyer 401 sans jwt', async () => {
         const payload = {
             method: 'POST'
