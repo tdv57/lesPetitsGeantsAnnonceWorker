@@ -1,4 +1,5 @@
 import { cors } from "hono/cors";
+import { createMiddleware } from "hono/factory";
 
 const WRITE_ORIGINS = ['https://panel.lespetitsgeantsarras.fr', 'http://localhost:5173', 'http://localhost:5174'];
 
@@ -17,3 +18,17 @@ export const corsMiddleware = cors({
                 : ['GET', 'HEAD'],
     allowHeaders: ["Content-Type", "Authorization"],
 });
+
+const WRITE_ORIGINS_LISTE = ['https://lespetitsgeantsarras.fr', 'http://localhost:5173', 'http://localhost:5174'];
+
+export const requireAllowedOriginListe = createMiddleware(async (c, next) => {
+   const origin = c.req.header('Origin');
+   if (origin && !WRITE_ORIGINS_LISTE.includes(origin)) return c.json({ error: 'Origine interdite' }, 403);
+   await next();
+ });
+ 
+export const corsMiddlewareListe = cors({
+  origin: (origin) => (WRITE_ORIGINS_LISTE.includes(origin) ? origin : null),
+  allowMethods: ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'PUT'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+})

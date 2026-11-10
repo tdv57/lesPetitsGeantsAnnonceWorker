@@ -18,6 +18,12 @@
 			"database_id": "21236e5a-795f-4014-9fa6-5db48f4f7f18"
 		},
 	],
+	"r2_buckets": [
+		{
+			"binding": "BUCKET_LISTE",
+			"bucket_name": "les-petits-geants-liste"
+		}
+	],
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
