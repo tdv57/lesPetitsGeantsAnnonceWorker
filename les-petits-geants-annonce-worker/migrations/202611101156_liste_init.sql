@@ -30,7 +30,7 @@ CREATE INDEX  IF NOT EXISTS idx_image_liste_user    ON image_liste(user_id);
 
 
 INSERT INTO user_liste (id, phone_hash) VALUES
-  (1, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), -- 0612345678
+  (1, 'ea3ab45b96efad6187b26bc702838d82da88c1264ff7b6eed427af0475017437'), -- 0612345678
   (2, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'); 
 
 INSERT INTO dossier_liste (id, user_id, name) VALUES
