@@ -11,11 +11,16 @@ export default defineConfig(async () => {
 		plugins: [
 			cloudflareTest({
 				wrangler: { configPath: "./wrangler.jsonc" },
-				miniflare: { bindings: { 
+				miniflare: { 
+					r2Buckets: ["BUCKET_LISTE"],
+					bindings: { 
 					TEST_MIGRATIONS: migrations,
 					D1_ANNONCE_ACCESS_KEY: "key",
 					JWT_SECRET: "secret",
-				} },
+					JWT_SECRET_LISTE: "secret",
+					PHONE_POIVRE: "poivre",
+					}, 
+				},
 			}),
 		],
 		test: {
