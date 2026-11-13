@@ -398,6 +398,23 @@ describe('POST /liste/dossier', () => {
         expect(response.status).toBe(HttpContentfulStatus.BAD_REQUEST);
     });
 
+    it("Répond 403 si on essaye de créer un dossier alors qu'on en a déjà un", async () => {
+        await env.DB_ANNONCE.exec("DELETE FROM dossier_liste");
+        const { headers, userId } = await authHeadersListe();
+        await createDossierListeForTest({name: "1"}, userId, env.DB_ANNONCE);
+        await createDossierListeForTest({name: "11"}, userId, env.DB_ANNONCE);
+        await createDossierListeForTest({name: "111"}, userId, env.DB_ANNONCE);
+        await createDossierListeForTest({name: "1111"}, userId, env.DB_ANNONCE);
+        await createDossierListeForTest({name: "11111"}, userId, env.DB_ANNONCE);
+        const payload = {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ name: "dossier test" })
+        };
+        let response = await request('/liste/dossier', payload);
+        expect(response.status).toBe(HttpContentfulStatus.FORBIDDEN);
+    });
+
     it("Répond 500 pour une duplication de (userId, name)", async () => {
         const { headers } = await authHeadersListe();
         const payload = {
@@ -625,6 +642,25 @@ describe("POST /liste/dossier/:dossierId/image", () => {
         expect(response.status).toBe(HttpContentfulStatus.NOT_FOUND);
         response = await request(`/liste/dossier/999/image`, payload);
         expect(response.status).toBe(HttpContentfulStatus.NOT_FOUND);
+    });
+
+    it("Doit renvoyer 403 si l'utilisateur a plus de 10 images dans son dossier", async () => {
+        await env.DB_ANNONCE.exec("DELETE FROM image_liste");
+        const { headers: authHeaders, userId } = await authHeadersListe();
+        for (let i = 1; i<=10; i++) {
+            await createImageListeForTest(userId, 1, "1".repeat(i), getFakeImage(), env.DB_ANNONCE, env.BUCKET_LISTE);
+        }
+        const headers = new Headers(authHeaders);
+        headers.delete("Content-Type");
+        const form = new FormData();
+        form.append("image", getFakeImage());
+        const payload = {
+            headers,
+            method: "POST",
+            body: form,
+        };
+        let response = await request(`/liste/dossier/1/image`, payload);
+        expect(response.status).toBe(HttpContentfulStatus.FORBIDDEN);
     });
 
     it("Doit renvoyer 400 si pas d'image", async () => {

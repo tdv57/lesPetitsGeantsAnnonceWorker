@@ -20,6 +20,7 @@ const DOSSIER_EXISTS_FOR_USER_QUERY = `
   SELECT EXISTS(
     SELECT 1 FROM dossier_liste WHERE id = ?1 AND user_id = ?2
   ) AS found`;
+const COUNT_BY_USER =  `SELECT COUNT(*) AS total FROM dossier_liste WHERE user_id = ?1`;;
 
 export async function findAllDossierByUser(db: D1Database, userId: number): Promise<DossierListeSelect[]> {
     const { results } = await db.prepare(FIND_ALL_BY_USER).bind(userId).all<D1DossierListe>();
@@ -78,4 +79,15 @@ export async function dossierBelongsToUser(
     .bind(dossierId, userId)
     .first<{ found: number }>();
   return row?.found === 1;
+}
+
+export async function countDossierByUser(
+    db: D1Database,
+    userId: number,
+): Promise<number> {
+    const count = await db.prepare(COUNT_BY_USER)
+        .bind(userId)
+        .first<{ total: number}>();
+    const total = count?.total;
+    return total ? total : 0;
 }

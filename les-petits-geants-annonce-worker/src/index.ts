@@ -11,11 +11,11 @@ import { TdvError } from './error/TdvError';
 import { HttpContentfulStatus, HttpContentlessStatus } from './enums/HttpStatusEnum';
 import { HTTPException } from 'hono/http-exception';
 import { getOrCreateUser } from './repository/UserListe';
-import { createDossier, deleteDossier, dossierBelongsToUser, findAllDossierByUser, updateDossier } from './repository/DossierListe';
+import { countDossierByUser, createDossier, deleteDossier, dossierBelongsToUser, findAllDossierByUser, updateDossier } from './repository/DossierListe';
 import { AnnonceContext, AnnonceEnv } from './types/HonoType';
 import { DossierListeInsertSchema, DossierListeUpdateSchema } from './validation/ListeValidation';
 import { DossierListeInsert, DossierListeUpdate } from './types/ListeType';
-import { createImage, deleteImage, findAllImageByDossierAndUser } from './repository/ImageListe';
+import { countImageByDossier, createImage, deleteImage, findAllImageByDossierAndUser } from './repository/ImageListe';
 import { uploadBodyLimit } from './validation/ImageUtilValidation';
 
 const app = new Hono<AnnonceEnv>();
@@ -103,6 +103,10 @@ app.post(
     zValidator('json', DossierListeInsertSchema), 
     async (c) => {
     const dossierInsert: DossierListeInsert = c.req.valid('json');
+    const totalDossier = await countDossierByUser(c.env.DB_ANNONCE, getUser(c));
+    if(totalDossier >= 5) {
+        return c.json({ error: 'Vous ne pouvez pas avoir plus de 5 dossiers' }, HttpContentfulStatus.FORBIDDEN);
+    }
     return c.json(await createDossier(c.env.DB_ANNONCE, dossierInsert, getUser(c)), HttpContentfulStatus.CREATED);
 });
 
@@ -142,6 +146,10 @@ app.post(
     const { dossierId } = c.req.valid('param');
     if(! await dossierBelongsToUser(c.env.DB_ANNONCE, dossierId, getUser(c))) {
         return c.json({ error: 'Dossier introuvable' }, 404);
+    }
+    const totalImage = await countImageByDossier(c.env.DB_ANNONCE, getUser(c), dossierId);
+    if(totalImage >= 10) {
+        return c.json({ error: 'Vous ne pouvez pas avoir plus de 10 images dans un dossier' }, HttpContentfulStatus.FORBIDDEN);
     }
     const form = await c.req.formData();
     const file = form.get('image');
