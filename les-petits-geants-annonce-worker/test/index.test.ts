@@ -405,13 +405,20 @@ describe('POST /liste/dossier', () => {
         await createDossierListeForTest({name: "11"}, userId, env.DB_ANNONCE);
         await createDossierListeForTest({name: "111"}, userId, env.DB_ANNONCE);
         await createDossierListeForTest({name: "1111"}, userId, env.DB_ANNONCE);
-        await createDossierListeForTest({name: "11111"}, userId, env.DB_ANNONCE);
-        const payload = {
+        let payload = {
             method: 'POST',
             headers,
             body: JSON.stringify({ name: "dossier test" })
         };
         let response = await request('/liste/dossier', payload);
+        expect(response.status).toBe(HttpContentfulStatus.CREATED);
+        await createDossierListeForTest({name: "11111"}, userId, env.DB_ANNONCE);
+        payload = {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ name: "dossier test" })
+        };
+        response = await request('/liste/dossier', payload);
         expect(response.status).toBe(HttpContentfulStatus.FORBIDDEN);
     });
 
