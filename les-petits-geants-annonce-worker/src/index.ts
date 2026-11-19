@@ -15,7 +15,7 @@ import { countDossierByUser, createDossier, deleteDossier, dossierBelongsToUser,
 import { AnnonceContext, AnnonceEnv } from './types/HonoType';
 import { DossierListeInsertSchema, DossierListeUpdateSchema } from './validation/ListeValidation';
 import { DossierListeInsert, DossierListeUpdate } from './types/ListeType';
-import { countImageByDossier, createImage, deleteImage, findAllImageByDossierAndUser } from './repository/ImageListe';
+import { countAllImage, countImageByDossier, createImage, deleteImage, findAllImageByDossierAndUser } from './repository/ImageListe';
 import { uploadBodyLimit } from './validation/ImageUtilValidation';
 
 const app = new Hono<AnnonceEnv>();
@@ -147,10 +147,13 @@ app.post(
     if(! await dossierBelongsToUser(c.env.DB_ANNONCE, dossierId, getUser(c))) {
         return c.json({ error: 'Dossier introuvable' }, 404);
     }
-    const totalImage = await countImageByDossier(c.env.DB_ANNONCE, getUser(c), dossierId);
-    if(totalImage >= 10) {
+    const totalImage = await countAllImage(c.env.DB_ANNONCE);
+    const totalImageInDossier = await countImageByDossier(c.env.DB_ANNONCE, getUser(c), dossierId);
+    if (totalImage >= 1_000*50) { // 50 images par utilisateur max 1_000 users pour être large avec un prix correct
+        return c.json({ error: 'Le serveur ne peut plus accueillir d\'images.' }, HttpContentfulStatus.FORBIDDEN);
+    } else if(totalImageInDossier >= 10) {
         return c.json({ error: 'Vous ne pouvez pas avoir plus de 10 images dans un dossier' }, HttpContentfulStatus.FORBIDDEN);
-    }
+    }  
     const form = await c.req.formData();
     const file = form.get('image');
     if (!(file instanceof File)) return c.json({ error: 'Fichier manquant' }, 400);

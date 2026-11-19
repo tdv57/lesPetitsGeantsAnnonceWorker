@@ -19,7 +19,7 @@ export const corsMiddleware = cors({
     allowHeaders: ["Content-Type", "Authorization"],
 });
 
-const WRITE_ORIGINS_LISTE = ['https://lespetitsgeantsarras.fr', 'http://localhost:5173', 'http://localhost:5174'];
+const WRITE_ORIGINS_LISTE = ['https://lespetitsgeantsarras.fr', 'http://localhost:5173', 'http://localhost:5174', 'http://dev-les-petits-geants-444952541544-eu-north-1-an.s3-website.eu-north-1.amazonaws.com'];
 
 export const requireAllowedOriginListe = createMiddleware(async (c, next) => {
    const origin = c.req.header('Origin');

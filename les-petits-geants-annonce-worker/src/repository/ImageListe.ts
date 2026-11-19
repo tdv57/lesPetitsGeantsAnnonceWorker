@@ -13,7 +13,8 @@ const INSERT_QUERY = `
     VALUES (?1, ?2, ?3)
     RETURNING *`;
 const DELETE_QUERY = "DELETE FROM image_liste WHERE user_id=?1 AND dossier_id=?2 AND id=?3";
-const COUNT_BY_DOSSIER_BY_USER =  `SELECT COUNT(*) AS total FROM image_liste WHERE user_id = ?1 AND dossier_id = ?2`;;
+const COUNT_BY_DOSSIER_BY_USER =  `SELECT COUNT(*) AS total FROM image_liste WHERE user_id = ?1 AND dossier_id = ?2`;
+const COUNT = "SELECT COUNT(*) AS total FROM image_liste";
 
 export async function findAllImageByDossierAndUser(db: D1Database, userId: number, dossierId: number): Promise<ImageListeSelect[]> {
     const { results } = await db.prepare(FIND_ALL_BY_USER_AND_DOSSIER).bind(userId, dossierId).all<D1ImageListe>();
@@ -74,6 +75,15 @@ export async function countImageByDossier(
 ): Promise<number> {
     const count = await db.prepare(COUNT_BY_DOSSIER_BY_USER)
         .bind(userId, dossierId)
+        .first<{ total: number}>();
+    const total = count?.total;
+    return total ? total : 0;
+}
+
+export async function countAllImage(
+    db: D1Database
+): Promise<number> {
+    const count = await db.prepare(COUNT)
         .first<{ total: number}>();
     const total = count?.total;
     return total ? total : 0;
